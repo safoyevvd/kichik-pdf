@@ -143,7 +143,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
       <p>Rasmlarni PDF qiling, hajmini kichraytiring, fayllarni birlashtiring yoki sahifalarini ajratib oling. Roʻyxatdan oʻtish shart emas.</p>
       <ul class="facts">
         <li>Fayllar serverga yuborilmaydi</li>
-        <li>Bepul</li>
+        <li>Kuniga 1 ta bepul · Premium cheksiz</li>
         <li>Telefonda ham ishlaydi</li>
       </ul>
     </div>
@@ -227,7 +227,6 @@ async function saveFile(out, statusEl) {
   }
 }
 
-
 /* ---------- sahifa diapazonlari: "1-3, 5, 8-" ---------- */
 function parseRanges(text, max) {
   const parts = text.split(',').map(s => s.trim()).filter(Boolean);
@@ -245,7 +244,6 @@ function parseRanges(text, max) {
 }
 
 /* ---------- vositalar roʻyxati ---------- */
-/* run(entries, opts, progress) -> [{name, data(Uint8Array), note?}] */
 const TOOLS = [];
 const SOON = [
   ['PDF → DOCX', 'PDF dan Word hujjatiga'],
@@ -580,6 +578,109 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 route();
+
+/* ---------- KichikPDF Premium va kunlik limit tizimi ---------- */
+(function () {
+  const TELEGRAM_LINK = "https://t.me/safoyevvv7"; 
+  const VALID_CODES = ["KICHIK2026", "VIP777", "PROPDF"]; 
+
+  const TODAY = new Date().toISOString().slice(0, 10);
+  const isPremium = () => localStorage.getItem("kpdf_pro") === "1";
+  const usedToday = () => localStorage.getItem("kpdf_used_date") === TODAY;
+  const markUsed = () => localStorage.setItem("kpdf_used_date", TODAY);
+
+  const bar = document.querySelector(".top .bar");
+  const tag = document.querySelector(".top .tag");
+  if (bar && tag) {
+    const badge = document.createElement("button");
+    badge.type = "button";
+    badge.style.cssText = "padding:6px 12px;border-radius:99px;border:1px solid var(--red);background:var(--tint);color:var(--red-text);font:600 .78rem var(--f-mono);cursor:pointer;";
+    const updateBadge = () => {
+      badge.textContent = isPremium() ? "★ PREMIUM FAOL" : (usedToday() ? "Limit: 0/1 · Premium" : "Limit: 1/1 · Premium");
+    };
+    updateBadge();
+    badge.onclick = () => openModal(false);
+    tag.replaceWith(badge);
+    window._updateKpdfBadge = updateBadge;
+  }
+
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;padding:16px;z-index:9999;";
+  modal.innerHTML = `
+    <div style="width:100%;max-width:420px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 40px rgba(0,0,0,.25);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:1.15rem;color:var(--red);">★ KichikPDF Premium</h3>
+        <button id="kpdf-close" type="button" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mute);">✕</button>
+      </div>
+      <p id="kpdf-desc" style="font-size:.94rem;color:var(--mute);line-height:1.5;"></p>
+      <div style="background:var(--tint);padding:12px;border-radius:8px;font-size:.88rem;line-height:1.5;">
+        <b>Premium imkoniyatlari:</b><br>
+        ✓ Kunlik cheklovsiz (cheksiz PDF qayta ishlash)<br>
+        ✓ Barcha vositalardan istalgancha foydalanish
+      </div>
+      <a href="${TELEGRAM_LINK}" target="_blank" style="text-align:center;padding:12px;border-radius:8px;background:var(--red);color:var(--red-ink);font-weight:600;text-decoration:none;">
+        Telegram orqali Premium olish →
+      </a>
+      <div style="border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px;">
+        <label style="font:500 .75rem var(--f-mono);color:var(--mute);text-transform:uppercase;">Kodingiz bormi? Shu yerga kiriting:</label>
+        <div style="display:flex;gap:8px;">
+          <input id="kpdf-code" type="text" placeholder="Masalan: KICHIK2026" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);">
+          <button id="kpdf-activate" type="button" style="padding:10px 14px;border-radius:6px;border:none;background:var(--ink);color:var(--bg);font-weight:600;cursor:pointer;">Faollashtirish</button>
+        </div>
+        <small id="kpdf-msg" style="font-size:.82rem;"></small>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  function openModal(limitReached) {
+    const desc = document.getElementById("kpdf-desc");
+    const msg = document.getElementById("kpdf-msg");
+    msg.textContent = "";
+    if (isPremium()) {
+      desc.textContent = "Sizda Premium faollashtirilgan! Barcha vositalardan cheksiz foydalanishingiz mumkin.";
+    } else if (limitReached) {
+      desc.innerHTML = "<b style='color:var(--bad);'>Bugungi 1 ta bepul limitingiz tugadi!</b> Ertagacha kuting yoki hoziroq Premium olib cheksiz ishlang.";
+    } else {
+      desc.textContent = "Bepul tarifda kuniga 1 ta amal bajarish mumkin. Cheksiz foydalanish uchun Premium faollashtiring.";
+    }
+    modal.style.display = "grid";
+  }
+
+  document.getElementById("kpdf-close").onclick = () => (modal.style.display = "none");
+  modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+
+  document.getElementById("kpdf-activate").onclick = () => {
+    const val = document.getElementById("kpdf-code").value.trim().toUpperCase();
+    const msg = document.getElementById("kpdf-msg");
+    if (VALID_CODES.includes(val)) {
+      localStorage.setItem("kpdf_pro", "1");
+      msg.style.color = "var(--ok)";
+      msg.textContent = "Tabriklaymiz! Premium muvaffaqiyatli faollashtirildi.";
+      if (window._updateKpdfBadge) window._updateKpdfBadge();
+      setTimeout(() => (modal.style.display = "none"), 1200);
+    } else {
+      msg.style.color = "var(--bad)";
+      msg.textContent = "Notoʻgʻri kod! Telegram orqali yangi kod oling.";
+    }
+  };
+
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest("#go");
+    if (!btn || btn.disabled) return;
+
+    if (!isPremium()) {
+      if (usedToday()) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        openModal(true);
+      } else {
+        markUsed();
+        if (window._updateKpdfBadge) window._updateKpdfBadge();
+      }
+    }
+  }, true);
+})();
 </script>
 
 </body></html>
