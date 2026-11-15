@@ -143,7 +143,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
       <p>Rasmlarni PDF qiling, hajmini kichraytiring, fayllarni birlashtiring yoki sahifalarini ajratib oling. Roʻyxatdan oʻtish shart emas.</p>
       <ul class="facts">
         <li>Fayllar serverga yuborilmaydi</li>
-        <li>Kuniga 1 ta bepul · Premium cheksiz</li>
+        <li>Kuniga 1 ta bepul · Premium 1 oylik cheksiz</li>
         <li>Telefonda ham ishlaydi</li>
       </ul>
     </div>
@@ -579,13 +579,26 @@ function route() {
 window.addEventListener('hashchange', route);
 route();
 
-/* ---------- KichikPDF Premium va kunlik limit tizimi ---------- */
+/* ---------- KichikPDF Premium (30 kunlik) va kunlik limit tizimi ---------- */
 (function () {
   const TELEGRAM_LINK = "https://t.me/safoyevvv7"; 
-  const VALID_CODES = ["KICHIK2026", "VIP777", "PROPDF"]; 
+  const VALID_CODES = ["1CHISAYT"]; 
+  const MONTH_MS = 30 * 24 * 60 * 60 * 1000; // 30 kun
 
   const TODAY = new Date().toISOString().slice(0, 10);
-  const isPremium = () => localStorage.getItem("kpdf_pro") === "1";
+
+  function getDaysLeft() {
+    const exp = Number(localStorage.getItem("kpdf_pro_until") || 0);
+    if (!exp) return 0;
+    const diff = exp - Date.now();
+    if (diff <= 0) {
+      localStorage.removeItem("kpdf_pro_until");
+      return 0;
+    }
+    return Math.ceil(diff / (24 * 60 * 60 * 1000));
+  }
+
+  const isPremium = () => getDaysLeft() > 0;
   const usedToday = () => localStorage.getItem("kpdf_used_date") === TODAY;
   const markUsed = () => localStorage.setItem("kpdf_used_date", TODAY);
 
@@ -596,7 +609,8 @@ route();
     badge.type = "button";
     badge.style.cssText = "padding:6px 12px;border-radius:99px;border:1px solid var(--red);background:var(--tint);color:var(--red-text);font:600 .78rem var(--f-mono);cursor:pointer;";
     const updateBadge = () => {
-      badge.textContent = isPremium() ? "★ PREMIUM FAOL" : (usedToday() ? "Limit: 0/1 · Premium" : "Limit: 1/1 · Premium");
+      const days = getDaysLeft();
+      badge.textContent = days > 0 ? `★ PREMIUM (${days} kun)` : (usedToday() ? "Limit: 0/1 · Premium" : "Limit: 1/1 · Premium");
     };
     updateBadge();
     badge.onclick = () => openModal(false);
@@ -614,9 +628,9 @@ route();
       </div>
       <p id="kpdf-desc" style="font-size:.94rem;color:var(--mute);line-height:1.5;"></p>
       <div style="background:var(--tint);padding:12px;border-radius:8px;font-size:.88rem;line-height:1.5;">
-        <b>Premium imkoniyatlari:</b><br>
-        ✓ Kunlik cheklovsiz (cheksiz PDF qayta ishlash)<br>
-        ✓ Barcha vositalardan istalgancha foydalanish
+        <b>Premium imkoniyatlari (30 kun):</b><br>
+        ✓ 1 oy davomida cheksiz PDF qayta ishlash<br>
+        ✓ Barcha vositalardan cheklovsiz foydalanish
       </div>
       <a href="${TELEGRAM_LINK}" target="_blank" style="text-align:center;padding:12px;border-radius:8px;background:var(--red);color:var(--red-ink);font-weight:600;text-decoration:none;">
         Telegram orqali Premium olish →
@@ -637,12 +651,13 @@ route();
     const desc = document.getElementById("kpdf-desc");
     const msg = document.getElementById("kpdf-msg");
     msg.textContent = "";
-    if (isPremium()) {
-      desc.textContent = "Sizda Premium faollashtirilgan! Barcha vositalardan cheksiz foydalanishingiz mumkin.";
+    const days = getDaysLeft();
+    if (days > 0) {
+      desc.textContent = `Sizda Premium faollashtirilgan! Tugashiga yana ${days} kun bor.`;
     } else if (limitReached) {
-      desc.innerHTML = "<b style='color:var(--bad);'>Bugungi 1 ta bepul limitingiz tugadi!</b> Ertagacha kuting yoki hoziroq Premium olib cheksiz ishlang.";
+      desc.innerHTML = "<b style='color:var(--bad);'>Bugungi 1 ta bepul limitingiz tugadi!</b> Ertagacha kuting yoki hoziroq 1 oylik Premium olib cheksiz ishlang.";
     } else {
-      desc.textContent = "Bepul tarifda kuniga 1 ta amal bajarish mumkin. Cheksiz foydalanish uchun Premium faollashtiring.";
+      desc.textContent = "Bepul tarifda kuniga 1 ta amal bajarish mumkin. 30 kun cheksiz foydalanish uchun Premium faollashtiring.";
     }
     modal.style.display = "grid";
   }
@@ -654,9 +669,9 @@ route();
     const val = document.getElementById("kpdf-code").value.trim().toUpperCase();
     const msg = document.getElementById("kpdf-msg");
     if (VALID_CODES.includes(val)) {
-      localStorage.setItem("kpdf_pro", "1");
+      localStorage.setItem("kpdf_pro_until", String(Date.now() + MONTH_MS));
       msg.style.color = "var(--ok)";
-      msg.textContent = "Tabriklaymiz! Premium muvaffaqiyatli faollashtirildi.";
+      msg.textContent = "Tabriklaymiz! 30 kunlik Premium muvaffaqiyatli faollashtirildi.";
       if (window._updateKpdfBadge) window._updateKpdfBadge();
       setTimeout(() => (modal.style.display = "none"), 1200);
     } else {
