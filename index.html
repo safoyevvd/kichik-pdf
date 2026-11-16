@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>KichikPDF — Bepul va tezkor onlayn PDF vositalari</title>
-<meta name="description" content="Rasmlarni PDF qilish, PDF hajmini kichraytirish, birlashtirish, bo'lish va PDF dan rasmga o'tkazish. Ro'yxatdan o'tish shart emas.">
+<meta name="description" content="Rasmlarni PDF qilish, PDF hajmini kichraytirish, birlashtirish, bo'lish, PDF dan rasmga va Word/Excel/PowerPoint formatlariga o'tkazish.">
 <link rel="icon" type="image/jpeg" href="logo.jpg">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -142,7 +142,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
     </a>
     <div class="nav-actions">
       <button id="theme-toggle" class="theme-btn" type="button" title="Mavzuni oʻzgartirish" aria-label="Mavzuni oʻzgartirish">🌓</button>
-      <span class="tag">Brauzerda ishlaydi</span>
+      <span class="tag">Tezkor PDF</span>
     </div>
   </div>
 </header>
@@ -151,26 +151,26 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
   <section id="view-home">
     <div class="wrap hero">
       <h1>PDF bilan ishlashning <em>eng oson</em> yoʻli</h1>
-      <p>Rasmlarni PDF qiling, hajmini kichraytiring, fayllarni birlashtiring, sahifalarini ajrating yoki PDF ni rasmga aylantiring. Roʻyxatdan oʻtish shart emas.</p>
+      <p>Rasmlarni PDF qiling, hajmini kichraytiring, fayllarni birlashtiring, PDF ni rasmga yoki Word, Excel, PowerPoint hujjatlariga aylantiring.</p>
       <ul class="facts">
-        <li>Fayllar serverga yuborilmaydi</li>
+        <li>Tezkor va sifatli natija</li>
         <li>Kuniga 1 ta bepul · Premium 1 oylik cheksiz</li>
         <li>Telefonda ham ishlaydi</li>
       </ul>
     </div>
     <div class="wrap sec">
-      <h2>Hozir ishlaydigan vositalar</h2>
+      <h2>Barcha vositalar</h2>
       <div class="grid" id="grid-live"></div>
     </div>
     <div class="wrap sec">
       <h2>Tez orada</h2>
-      <p class="sub">Bu oʻzgartirishlar uchun serverda ishlaydigan qism kerak. U tayyor boʻlmaguncha, ularni ishlaydi deb koʻrsatmaymiz.</p>
+      <p class="sub">Murakkab jadval va taqdimotlarni PDF dan ajratish vositalari ustida ishlayapmiz.</p>
       <div class="grid" id="grid-soon"></div>
     </div>
     <div class="wrap priv">
-      <div><h3>Fayllaringiz sizda qoladi</h3><p>Amallar shu brauzer ichida bajariladi. Fayl hech qayerga yuborilmaydi va sahifa yopilgach hech narsa saqlanmaydi.</p></div>
+      <div><h3>Fayllaringiz xavfsiz</h3><p>Oddiy amallar brauzerning oʻzida, Office hujjatlari esa maxsus himoyalangan serverda qayta ishlanib, darhol oʻchiriladi.</p></div>
       <div><h3>Natija haqiqiy</h3><p>Har bir vosita faylni haqiqatan qayta ishlaydi. Natija hajmi va sahifalar soni oldin va keyin koʻrsatiladi.</p></div>
-      <div><h3>Ochiq shartlar</h3><p>Siqishda matn rasmga aylanishi mumkin. Bunday holatlarni vosita ichida alohida yozib qoʻyganmiz.</p></div>
+      <div><h3>Ochiq shartlar</h3><p>Bepul server uygʻonishi uchun birinchi soʻrovda 30–50 soniya kutish kerak boʻlishi mumkin, keyingi fayllar zumda ishlaydi.</p></div>
     </div>
   </section>
 
@@ -184,10 +184,12 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
   <span>Yordam / Bot</span>
 </a>
 
-<footer><div class="wrap">KichikPDF. Fayllar shu qurilmadagi brauzerda qayta ishlanadi.</div></footer>
+<footer><div class="wrap">KichikPDF — Bepul va tezkor onlayn PDF vositalari.</div></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script>
+const SERVER_URL = "https://kichik-pdf.onrender.com";
+
 /* ---------- mavzu (Dark/Light) ---------- */
 (function(){
   const saved = localStorage.getItem('kpdf_theme');
@@ -243,12 +245,42 @@ const needPdfjs = () => pdfjsReady || (pdfjsReady = (async () => {
   pdfjsLib.GlobalWorkerOptions.workerSrc = CDN + 'pdf.js/3.11.174/pdf.worker.min.js';
 })());
 
+/* ---------- server orqali konvertatsiya ---------- */
+async function convertViaServer(file, targetExt, progress) {
+  progress(1, 4, 'Serverga ulanmoqda (birinchi safar 30-50 soniya kutish mumkin)...');
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('target', targetExt);
+
+  let res;
+  try {
+    res = await fetch(SERVER_URL + '/convert', { method: 'POST', body: fd });
+  } catch (e) {
+    throw new Error('Serverga ulanib boʻlmadi. Internetni tekshiring yoki 30 soniyadan keyin qayta urining.');
+  }
+
+  progress(3, 4, 'Hujjat qayta ishlanmoqda...');
+  if (!res.ok) {
+    let errText = 'Serverda xatolik yuz berdi.';
+    try {
+      const j = await res.json();
+      if (j.detail) errText = j.detail;
+    } catch (_) {}
+    throw new Error(errText);
+  }
+
+  const buf = await res.arrayBuffer();
+  progress(4, 4, 'Tayyor!');
+  return new Uint8Array(buf);
+}
+
 /* ---------- saqlash (yuklab olish) ---------- */
 async function saveFile(out, statusEl) {
   try {
     const mime = out.name.endsWith('.zip') ? 'application/zip'
       : out.name.endsWith('.png') ? 'image/png'
       : out.name.endsWith('.jpg') ? 'image/jpeg'
+      : out.name.endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       : 'application/pdf';
     const blob = new Blob([out.data], { type: mime });
     const url = URL.createObjectURL(blob);
@@ -265,7 +297,7 @@ async function saveFile(out, statusEl) {
   }
 }
 
-/* ---------- sahifa diapazonlari: "1-3, 5, 8-" ---------- */
+/* ---------- sahifa diapazonlari ---------- */
 function parseRanges(text, max) {
   const parts = text.split(',').map(s => s.trim()).filter(Boolean);
   if (!parts.length) throw new Error('Sahifa raqamlarini yozing. Masalan: 1-3, 5');
@@ -284,16 +316,15 @@ function parseRanges(text, max) {
 /* ---------- vositalar roʻyxati ---------- */
 const TOOLS = [];
 const SOON = [
-  ['PDF → DOCX', 'PDF dan Word hujjatiga'],
   ['PDF → XLSX', 'PDF dagi jadvallarni Excel ga'],
-  ['PDF → PPTX', 'PDF dan PowerPoint taqdimotiga'],
-  ['DOCX → PDF', 'Word hujjatini PDF ga'],
-  ['XLSX → PDF', 'Excel jadvalini PDF ga'],
-  ['PPTX → PDF', 'PowerPoint taqdimotini PDF ga']
+  ['PDF → PPTX', 'PDF dan PowerPoint taqdimotiga']
 ];
 
 const isPdf = f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
 const isImg = f => /^image\/(jpeg|png|webp)$/.test(f.type) || /\.(jpe?g|png|webp)$/i.test(f.name);
+const isDocx = f => /\.(docx?|rtf|odt)$/i.test(f.name);
+const isXlsx = f => /\.(xlsx?|csv|ods)$/i.test(f.name);
+const isPptx = f => /\.(pptx?|odp)$/i.test(f.name);
 const readBytes = async f => new Uint8Array(await f.arrayBuffer());
 const toBlob = (c, type, q) => new Promise(r => c.toBlob(r, type, q));
 
@@ -400,7 +431,63 @@ TOOLS.push({
   }
 });
 
-/* 3. PDF siqish */
+/* 3. PDF → DOCX (Word) */
+TOOLS.push({
+  id: 'pdf-docx', name: 'PDF dan Word ga', fmt: 'PDF → DOCX',
+  short: 'PDF hujjatni tahrirlanadigan Word (.docx) faylga aylantiring.',
+  title: 'PDF dan Word (DOCX) ga oʻtkazish',
+  desc: 'PDF fayldagi matn va tuzilmani saqlagan holda Word hujjatiga oʻtkazadi.',
+  test: isPdf, accept: 'application/pdf', hint: 'PDF fayl', multiple: false, min: 1, kind: 'pdf', opts: [],
+  async run(entries, o, progress) {
+    const f = entries[0].file;
+    const data = await convertViaServer(f, 'docx', progress);
+    return [{ name: baseName(f.name) + '.docx', data, note: 'Word hujjati' }];
+  }
+});
+
+/* 4. DOCX → PDF (Word) */
+TOOLS.push({
+  id: 'docx-pdf', name: 'Word dan PDF ga', fmt: 'DOCX · DOC → PDF',
+  short: 'Word hujjatini dizayn va shriftlarini buzmasdan PDF qiling.',
+  title: 'Word hujjatini PDF ga oʻtkazish',
+  desc: 'DOC yoki DOCX faylni asl koʻrinishini 100% saqlagan holda PDF formatiga oʻtkazadi.',
+  test: isDocx, accept: '.doc,.docx,.rtf,.odt', hint: 'Word fayl (.docx, .doc)', multiple: false, min: 1, kind: 'office', opts: [],
+  async run(entries, o, progress) {
+    const f = entries[0].file;
+    const data = await convertViaServer(f, 'pdf', progress);
+    return [{ name: baseName(f.name) + '.pdf', data, note: 'PDF hujjat' }];
+  }
+});
+
+/* 5. XLSX → PDF (Excel) */
+TOOLS.push({
+  id: 'xlsx-pdf', name: 'Excel dan PDF ga', fmt: 'XLSX · XLS → PDF',
+  short: 'Excel jadvallarini chop etishga tayyor PDF faylga oʻtkazing.',
+  title: 'Excel jadvalini PDF ga oʻtkazish',
+  desc: 'XLS yoki XLSX jadvalini ustun va kataklarni buzmasdan PDF hujjatga aylantiradi.',
+  test: isXlsx, accept: '.xls,.xlsx,.csv,.ods', hint: 'Excel fayl (.xlsx, .xls)', multiple: false, min: 1, kind: 'office', opts: [],
+  async run(entries, o, progress) {
+    const f = entries[0].file;
+    const data = await convertViaServer(f, 'pdf', progress);
+    return [{ name: baseName(f.name) + '.pdf', data, note: 'PDF jadval' }];
+  }
+});
+
+/* 6. PPTX → PDF (PowerPoint) */
+TOOLS.push({
+  id: 'pptx-pdf', name: 'PowerPoint dan PDF ga', fmt: 'PPTX · PPT → PDF',
+  short: 'Taqdimot (slayd) fayllarini bitta ixcham PDF hujjatga oʻtkazing.',
+  title: 'PowerPoint taqdimotini PDF ga oʻtkazish',
+  desc: 'PPT yoki PPTX fayldagi barcha slaydlarni asl dizayni bilan PDF sahifalariga aylantiradi.',
+  test: isPptx, accept: '.ppt,.pptx,.odp', hint: 'PowerPoint fayl (.pptx, .ppt)', multiple: false, min: 1, kind: 'office', opts: [],
+  async run(entries, o, progress) {
+    const f = entries[0].file;
+    const data = await convertViaServer(f, 'pdf', progress);
+    return [{ name: baseName(f.name) + '.pdf', data, note: 'PDF taqdimot' }];
+  }
+});
+
+/* 7. PDF siqish */
 TOOLS.push({
   id: 'siqish', name: 'PDF siqish', fmt: 'PDF → kichik PDF',
   short: 'PDF hajmini sifat darajasini tanlab kichraytiring.',
@@ -459,7 +546,7 @@ TOOLS.push({
   }
 });
 
-/* 4. PDF birlashtirish */
+/* 8. PDF birlashtirish */
 TOOLS.push({
   id: 'birlashtirish', name: 'PDF birlashtirish', fmt: 'PDF + PDF → PDF',
   short: 'Bir nechta PDF ni tanlangan tartibda bitta faylga qoʻshing.',
@@ -482,7 +569,7 @@ TOOLS.push({
   }
 });
 
-/* 5. PDF boʻlish */
+/* 9. PDF boʻlish */
 TOOLS.push({
   id: 'bolish', name: 'PDF boʻlish', fmt: 'PDF → sahifalar',
   short: 'Kerakli sahifalarni ajratib oling yoki hujjatni boʻlaklarga boʻling.',
@@ -520,7 +607,7 @@ TOOLS.push({
   }
 });
 
-/* 6. PDF aylantirish */
+/* 10. PDF aylantirish */
 TOOLS.push({
   id: 'aylantirish', name: 'PDF aylantirish', fmt: 'PDF → 90° / 180° / 270°',
   short: 'Sahifalarni toʻgʻri tomonga buring.',
@@ -544,11 +631,22 @@ TOOLS.push({
 });
 
 /* ---------- bosh sahifa ---------- */
-const CTA = { 'rasm-pdf': 'PDF yasash', 'pdf-rasm': 'Rasmga oʻtkazish', 'siqish': 'Siqish', 'birlashtirish': 'Birlashtirish', 'bolish': 'Boʻlish', 'aylantirish': 'Aylantirish' };
+const CTA = {
+  'rasm-pdf': 'PDF yasash',
+  'pdf-rasm': 'Rasmga oʻtkazish',
+  'pdf-docx': 'Word ga oʻtkazish',
+  'docx-pdf': 'PDF ga oʻtkazish',
+  'xlsx-pdf': 'PDF ga oʻtkazish',
+  'pptx-pdf': 'PDF ga oʻtkazish',
+  'siqish': 'Siqish',
+  'birlashtirish': 'Birlashtirish',
+  'bolish': 'Boʻlish',
+  'aylantirish': 'Aylantirish'
+};
 TOOLS.forEach(t => $('#grid-live').append(
   h('a', { class: 'card', href: '#' + t.id }, h('span', { class: 'fmt' }, t.fmt), h('h3', {}, t.name), h('p', {}, t.short), h('span', { class: 'go' }, 'Ochish →'))));
 SOON.forEach(([f, d]) => $('#grid-soon').append(
-  h('div', { class: 'card soon' }, h('span', { class: 'fmt' }, f), h('h3', {}, d), h('p', {}, 'Serverda ishlov kerak.'), h('span', { class: 'pill' }, 'Tez orada'))));
+  h('div', { class: 'card soon' }, h('span', { class: 'fmt' }, f), h('h3', {}, d), h('p', {}, 'Tez orada qoʻshiladi.'), h('span', { class: 'pill' }, 'Tez orada'))));
 
 /* ---------- vosita sahifasi ---------- */
 let cur = null, st = null;
@@ -596,7 +694,11 @@ async function addFiles(files) {
     if (cur.kind === 'pdf') {
       try { e.pages = (await PDFLib.PDFDocument.load(await readBytes(f))).getPageCount(); }
       catch (err) { msgs.push('"' + f.name + '" ni ochib boʻlmadi. Fayl parol bilan himoyalangan yoki buzilgan boʻlishi mumkin.'); continue; }
-    } else e.url = URL.createObjectURL(f);
+    } else if (cur.kind === 'image') {
+      e.url = URL.createObjectURL(f);
+    } else {
+      e.badge = (f.name.split('.').pop() || 'DOC').toUpperCase();
+    }
     if (!cur.multiple) S.entries = [];
     S.entries.push(e);
   }
@@ -609,7 +711,7 @@ function removeAt(i) { const [e] = st.entries.splice(i, 1); if (e.url) URL.revok
 function renderFiles() {
   const ul = $('#files'), a = st.entries;
   ul.replaceChildren(...a.map((e, i) => h('li', { class: 'file' },
-    h('div', { class: 'thumb' }, e.url ? h('img', { src: e.url, alt: '' }) : 'PDF'),
+    h('div', { class: 'thumb' }, e.url ? h('img', { src: e.url, alt: '' }) : (e.badge || 'PDF')),
     h('div', { class: 'fname' }, h('b', { title: e.file.name }, e.file.name), h('span', {}, fmt(e.file.size) + (e.pages ? ' · ' + e.pages + ' sahifa' : ''))),
     h('div', { class: 'fact' },
       cur.order ? [ib('↑', 'Yuqoriga', () => move(i, -1), i === 0), ib('↓', 'Pastga', () => move(i, 1), i === a.length - 1)] : null,
@@ -631,7 +733,6 @@ function renderOpts() {
     return h('div', { class: 'opt' }, h('label', { for: id }, op.label), ctl, op.pdfMax && pages ? h('small', {}, 'Hujjatda ' + pages + ' sahifa bor.') : null);
   });
 
-  /* Har doim chiqadigan Fayl nomi maydoni */
   nodes.push(
     h('div', { class: 'opt' },
       h('label', { for: 'o-custom-name' }, 'Fayl nomi (ixtiyoriy)'),
@@ -655,7 +756,7 @@ async function run() {
   if (S.busy) return;
   S.busy = true; clearResult(); notice([]); renderFiles();
   const prog = $('#prog'), bar = $('#bar'), status = $('#status');
-  prog.hidden = false; bar.style.width = '0%';
+  prog.hidden = false; bar.style.width = '10%';
   try {
     const outs = await t.run(S.entries, { ...S.opts }, (d, n, label) => { if (S !== st) return; bar.style.width = Math.round(d / n * 100) + '%'; status.textContent = label || ''; });
     if (S === st) {
