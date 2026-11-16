@@ -1,12 +1,12 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
-<title>KichikPDF</title>
+<title>KichikPDF — Bepul va tezkor onlayn PDF vositalari</title>
+<meta name="description" content="Rasmlarni PDF qilish, PDF hajmini kichraytirish, birlashtirish, bo'lish va PDF dan rasmga o'tkazish. Ro'yxatdan o'tish shart emas.">
 <link rel="icon" type="image/jpeg" href="logo.jpg">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Unbounded:wght@500;700&display=swap">
 <style>
-/* Layout: oq varaqqa oʻxshash kartochkalar (burchagi buklangan), qizil urgʻu bitta joyda: logotip va asosiy tugma */
 :root{
   --bg:#FCFAFA; --panel:#FFFFFF; --ink:#1C1416; --mute:#6B5C60; --line:#E9DADD;
   --red:#D3202B; --red-ink:#FFFFFF; --red-text:#B3121C; --tint:#FDEDEF;
@@ -40,11 +40,14 @@ button,input,select{font:inherit;color:inherit}
 
 /* sarlavha */
 .top{border-bottom:1px solid var(--line);background:var(--panel)}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:14px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .logo img{width:34px;height:34px;border-radius:8px;object-fit:cover;flex:none}
 .word{font:700 1.15rem var(--f-display);letter-spacing:-.01em}
 .word b{color:var(--red);font-weight:700}
+.nav-actions{display:flex;align-items:center;gap:8px}
+.theme-btn{width:34px;height:34px;display:grid;place-items:center;border-radius:99px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:1rem}
+.theme-btn:hover{border-color:var(--red)}
 .tag{font:500 .72rem var(--f-mono);color:var(--mute);letter-spacing:.04em;text-transform:uppercase;text-align:right}
 
 /* bosh sahifa */
@@ -76,6 +79,11 @@ a.card:hover .go{transform:translateX(4px)}
 .priv p{color:var(--mute);font-size:.92rem}
 footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;color:var(--mute);font-size:.85rem}
 
+/* suzuvchi telegram tugmasi */
+.tg-float{position:fixed;bottom:max(18px,env(safe-area-inset-bottom,18px));right:max(18px,env(safe-area-inset-right,18px));z-index:900;display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:99px;text-decoration:none;font:500 .85rem var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.14);transition:transform .15s,border-color .15s}
+.tg-float:hover{border-color:var(--red);transform:translateY(-2px)}
+.tg-dot{width:8px;height:8px;border-radius:50%;background:#24A1DE}
+
 /* vosita sahifasi */
 .tool{display:flex;flex-direction:column;gap:20px;padding-block:28px 12px}
 .back{align-self:flex-start;font:500 .85rem var(--f-mono);color:var(--red-text);text-decoration:none}
@@ -83,8 +91,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
 .thead{display:flex;flex-direction:column;gap:8px}
 .thead h1{font-size:clamp(1.5rem,4.4vw,2.2rem);font-weight:700}
 .thead p{color:var(--mute);max-width:60ch}
-.drop{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 16px;text-align:center;background:var(--tint);border:2px dashed var(--red);border-radius:8px;cursor:pointer}
-.drop{position:relative}
+.drop{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 16px;text-align:center;background:var(--tint);border:2px dashed var(--red);border-radius:8px;cursor:pointer;position:relative}
 .drop:focus-within{outline:3px solid var(--red);outline-offset:2px}
 .drop.over{background:var(--panel)}
 .opts .msg{grid-column:1/-1}
@@ -123,7 +130,6 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
 .out ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
 .out li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:.92rem}
 .out li span{font-family:var(--f-mono);font-size:.82rem;color:var(--mute)}
-.cmp{display:flex;flex-wrap:wrap;gap:6px 18px;font:500 .85rem var(--f-mono)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head><body>
@@ -134,7 +140,10 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
       <img src="logo.jpg" alt="KichikPDF">
       <span class="word">Kichik<b>PDF</b></span>
     </a>
-    <span class="tag">Brauzerda ishlaydi</span>
+    <div class="nav-actions">
+      <button id="theme-toggle" class="theme-btn" type="button" title="Mavzuni oʻzgartirish" aria-label="Mavzuni oʻzgartirish">🌓</button>
+      <span class="tag">Brauzerda ishlaydi</span>
+    </div>
   </div>
 </header>
 
@@ -142,7 +151,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
   <section id="view-home">
     <div class="wrap hero">
       <h1>PDF bilan ishlashning <em>eng oson</em> yoʻli</h1>
-      <p>Rasmlarni PDF qiling, hajmini kichraytiring, fayllarni birlashtiring yoki sahifalarini ajratib oling. Roʻyxatdan oʻtish shart emas.</p>
+      <p>Rasmlarni PDF qiling, hajmini kichraytiring, fayllarni birlashtiring, sahifalarini ajrating yoki PDF ni rasmga aylantiring. Roʻyxatdan oʻtish shart emas.</p>
       <ul class="facts">
         <li>Fayllar serverga yuborilmaydi</li>
         <li>Kuniga 1 ta bepul · Premium 1 oylik cheksiz</li>
@@ -170,10 +179,34 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding-block:20px 28px;
   </section>
 </main>
 
+<a class="tg-float" href="https://t.me/kichikpdf_pro_bot" target="_blank" rel="noopener">
+  <span class="tg-dot"></span>
+  <span>Yordam / Bot</span>
+</a>
+
 <footer><div class="wrap">KichikPDF. Fayllar shu qurilmadagi brauzerda qayta ishlanadi.</div></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script>
+/* ---------- mavzu (Dark/Light) ---------- */
+(function(){
+  const saved = localStorage.getItem('kpdf_theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  const btn = document.getElementById('theme-toggle');
+  const syncIcon = () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    btn.textContent = cur === 'dark' ? '☀️' : cur === 'light' ? '🌙' : '🌓';
+  };
+  syncIcon();
+  btn.onclick = () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('kpdf_theme', next);
+    syncIcon();
+  };
+})();
+
 /* ---------- yordamchi funksiyalar ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const h = (tag, attrs = {}, ...kids) => {
@@ -189,6 +222,13 @@ const h = (tag, attrs = {}, ...kids) => {
 const fmt = n => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
 const tick = () => new Promise(r => setTimeout(r, 0));
 const baseName = n => n.replace(/\.[^.]+$/, '');
+const applyCustomName = (defaultName, custom) => {
+  const clean = (custom || '').trim().replace(/[\\/:*?"<>|]/g, '');
+  if (!clean) return defaultName;
+  const extMatch = defaultName.match(/\.[^.]+$/);
+  const ext = extMatch ? extMatch[0] : '';
+  return clean.toLowerCase().endsWith(ext.toLowerCase()) ? clean : clean + ext;
+};
 const loadScript = src => new Promise((res, rej) => {
   const s = document.createElement('script');
   s.src = src; s.onload = res; s.onerror = () => rej(new Error('Kutubxona yuklanmadi. Internet aloqasini tekshiring.'));
@@ -206,23 +246,19 @@ const needPdfjs = () => pdfjsReady || (pdfjsReady = (async () => {
 /* ---------- saqlash (yuklab olish) ---------- */
 async function saveFile(out, statusEl) {
   try {
-    const blob = new Blob([out.data], {
-      type: out.name.endsWith('.zip')
-        ? 'application/zip'
-        : 'application/pdf'
-    });
-
+    const mime = out.name.endsWith('.zip') ? 'application/zip'
+      : out.name.endsWith('.png') ? 'image/png'
+      : out.name.endsWith('.jpg') ? 'image/jpeg'
+      : 'application/pdf';
+    const blob = new Blob([out.data], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-
     a.href = url;
     a.download = out.name;
     document.body.appendChild(a);
     a.click();
     a.remove();
-
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-
     statusEl.textContent = 'Faylni saqlash boshlandi: ' + out.name;
   } catch (e) {
     statusEl.textContent = 'Faylni saqlashda xatolik yuz berdi.';
@@ -308,7 +344,63 @@ TOOLS.push({
   }
 });
 
-/* 2. PDF siqish */
+/* 2. PDF dan Rasm */
+TOOLS.push({
+  id: 'pdf-rasm', name: 'PDF dan Rasm', fmt: 'PDF → JPG / PNG',
+  short: 'PDF sahifalarini alohida rasmlarga aylantirib yuklab oling.',
+  title: 'PDF sahifalarini rasmga oʻtkazish',
+  desc: 'Har bir sahifa alohida JPG yoki PNG rasmga aylanadi. Bir nechta sahifa boʻlsa, ZIP arxiv beriladi.',
+  test: isPdf, accept: 'application/pdf', hint: 'PDF fayl', multiple: false, min: 1, kind: 'pdf',
+  opts: [
+    { key: 'format', label: 'Rasm formati', type: 'select', value: 'jpg', options: [['jpg', 'JPG (ixcham hajm)'], ['png', 'PNG (yuqori aniqlik)']] },
+    { key: 'quality', label: 'Sifat darajasi', type: 'select', value: '2', options: [['1.5', 'Oʻrtacha (108 dpi)'], ['2', 'Yuqori (144 dpi)'], ['3', 'Juda yuqori (216 dpi)']] }
+  ],
+  async run(entries, o, progress) {
+    progress(0, 1, 'PDF oʻqish vositasi yuklanmoqda');
+    await needPdfjs();
+    const bytes = await readBytes(entries[0].file);
+    const base = baseName(entries[0].file.name);
+    let pdf;
+    try { pdf = await pdfjsLib.getDocument({ data: bytes.slice() }).promise; }
+    catch (e) { throw new Error(e && e.name === 'PasswordException' ? 'Fayl parol bilan himoyalangan.' : 'PDF faylni ochib boʻlmadi.'); }
+
+    const scale = +o.quality;
+    const isPng = o.format === 'png';
+    const mime = isPng ? 'image/png' : 'image/jpeg';
+    const ext = isPng ? '.png' : '.jpg';
+    const imgs = [];
+
+    for (let p = 1; p <= pdf.numPages; p++) {
+      progress(p - 1, pdf.numPages, 'Sahifa ' + p + ' / ' + pdf.numPages);
+      await tick();
+      const page = await pdf.getPage(p);
+      const vp = page.getViewport({ scale });
+      const c = document.createElement('canvas');
+      c.width = Math.ceil(vp.width);
+      c.height = Math.ceil(vp.height);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, c.width, c.height);
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      const blob = await toBlob(c, mime, 0.92);
+      c.width = c.height = 0;
+      imgs.push({ name: base + '-sahifa-' + p + ext, data: new Uint8Array(await blob.arrayBuffer()) });
+      page.cleanup();
+    }
+    await pdf.destroy();
+
+    if (imgs.length === 1) {
+      return [{ name: imgs[0].name, data: imgs[0].data, note: '1 ta rasm (' + o.format.toUpperCase() + ')' }];
+    }
+    progress(pdf.numPages, pdf.numPages, 'ZIP arxiv tayyorlanmoqda');
+    await needZip();
+    const z = new JSZip();
+    imgs.forEach(im => z.file(im.name, im.data));
+    return [{ name: base + '-rasmlar.zip', data: await z.generateAsync({ type: 'uint8array' }), note: imgs.length + ' ta rasm' }];
+  }
+});
+
+/* 3. PDF siqish */
 TOOLS.push({
   id: 'siqish', name: 'PDF siqish', fmt: 'PDF → kichik PDF',
   short: 'PDF hajmini sifat darajasini tanlab kichraytiring.',
@@ -367,7 +459,7 @@ TOOLS.push({
   }
 });
 
-/* 3. PDF birlashtirish */
+/* 4. PDF birlashtirish */
 TOOLS.push({
   id: 'birlashtirish', name: 'PDF birlashtirish', fmt: 'PDF + PDF → PDF',
   short: 'Bir nechta PDF ni tanlangan tartibda bitta faylga qoʻshing.',
@@ -390,7 +482,7 @@ TOOLS.push({
   }
 });
 
-/* 4. PDF boʻlish */
+/* 5. PDF boʻlish */
 TOOLS.push({
   id: 'bolish', name: 'PDF boʻlish', fmt: 'PDF → sahifalar',
   short: 'Kerakli sahifalarni ajratib oling yoki hujjatni boʻlaklarga boʻling.',
@@ -428,7 +520,7 @@ TOOLS.push({
   }
 });
 
-/* 5. PDF aylantirish */
+/* 6. PDF aylantirish */
 TOOLS.push({
   id: 'aylantirish', name: 'PDF aylantirish', fmt: 'PDF → 90° / 180° / 270°',
   short: 'Sahifalarni toʻgʻri tomonga buring.',
@@ -452,7 +544,7 @@ TOOLS.push({
 });
 
 /* ---------- bosh sahifa ---------- */
-const CTA = { 'rasm-pdf': 'PDF yasash', 'siqish': 'Siqish', 'birlashtirish': 'Birlashtirish', 'bolish': 'Boʻlish', 'aylantirish': 'Aylantirish' };
+const CTA = { 'rasm-pdf': 'PDF yasash', 'pdf-rasm': 'Rasmga oʻtkazish', 'siqish': 'Siqish', 'birlashtirish': 'Birlashtirish', 'bolish': 'Boʻlish', 'aylantirish': 'Aylantirish' };
 TOOLS.forEach(t => $('#grid-live').append(
   h('a', { class: 'card', href: '#' + t.id }, h('span', { class: 'fmt' }, t.fmt), h('h3', {}, t.name), h('p', {}, t.short), h('span', { class: 'go' }, 'Ochish →'))));
 SOON.forEach(([f, d]) => $('#grid-soon').append(
@@ -465,7 +557,7 @@ const ib = (label, aria, onclick, disabled) => h('button', { class: 'ib', type: 
 function showHome() { cur = null; st = null; $('#view-tool').hidden = true; $('#view-home').hidden = false; }
 function openTool(id) {
   cur = TOOLS.find(x => x.id === id);
-  st = { entries: [], opts: {}, busy: false, nextId: 1 };
+  st = { entries: [], opts: { _customName: '' }, busy: false, nextId: 1 };
   cur.opts.forEach(op => { if (op.type !== 'note') st.opts[op.key] = op.value; });
   $('#view-home').hidden = true; $('#view-tool').hidden = false;
   buildTool(); window.scrollTo(0, 0);
@@ -528,7 +620,7 @@ function renderFiles() {
 }
 function renderOpts() {
   const box = $('#opts'), o = st.opts;
-  if (!st.entries.length || !cur.opts.length) { box.replaceChildren(); return; }
+  if (!st.entries.length) { box.replaceChildren(); return; }
   const pages = st.entries[0].pages;
   const nodes = cur.opts.filter(op => !op.when || op.when(o)).map(op => {
     if (op.type === 'note') return h('div', { class: 'msg warn' }, op.text(o));
@@ -538,6 +630,23 @@ function renderOpts() {
       : h('input', { id, type: 'text', value: o[op.key], placeholder: op.placeholder || '', autocomplete: 'off', oninput: e => { o[op.key] = e.target.value; } });
     return h('div', { class: 'opt' }, h('label', { for: id }, op.label), ctl, op.pdfMax && pages ? h('small', {}, 'Hujjatda ' + pages + ' sahifa bor.') : null);
   });
+
+  /* Har doim chiqadigan Fayl nomi maydoni */
+  nodes.push(
+    h('div', { class: 'opt' },
+      h('label', { for: 'o-custom-name' }, 'Fayl nomi (ixtiyoriy)'),
+      h('input', {
+        id: 'o-custom-name',
+        type: 'text',
+        value: o._customName || '',
+        placeholder: 'Masalan: mening_hujjatim',
+        autocomplete: 'off',
+        oninput: e => { o._customName = e.target.value; }
+      }),
+      h('small', {}, 'Boʻsh qoldirilsa avtomatik nom beriladi.')
+    )
+  );
+
   box.replaceChildren(h('div', { class: 'opts' }, nodes));
 }
 
@@ -549,7 +658,11 @@ async function run() {
   prog.hidden = false; bar.style.width = '0%';
   try {
     const outs = await t.run(S.entries, { ...S.opts }, (d, n, label) => { if (S !== st) return; bar.style.width = Math.round(d / n * 100) + '%'; status.textContent = label || ''; });
-    if (S === st) showResult(outs);
+    if (S === st) {
+      const custom = S.opts._customName;
+      outs.forEach(o => { if (!o.reject) o.name = applyCustomName(o.name, custom); });
+      showResult(outs);
+    }
   } catch (e) {
     console.error(e);
     if (S === st) notice([e && e.message ? e.message : 'Xatolik yuz berdi. Qayta urinib koʻring.'], 'bad');
@@ -568,12 +681,12 @@ function showResult(outs) {
       h('ul', {}, h('li', {}, o.name, h('span', {}, fmt(o.data.length) + (o.note ? ' · ' + o.note : '')))),
       h('div', { class: 'row' },
         h('button', { class: 'btn primary', type: 'button', onclick: () => saveFile(o, stat) }, 'Saqlash'),
-        h('button', { class: 'btn ghost', type: 'button', onclick: () => { st.entries.forEach(e => e.url && URL.revokeObjectURL(e.url)); st.entries = []; clearResult(); renderFiles(); renderOpts(); } }, 'Yangi fayllar bilan boshlash')),
+        h('button', { class: 'btn ghost', type: 'button', onclick: () => { st.entries.forEach(e => e.url && URL.revokeObjectURL(e.url)); st.entries = []; st.opts._customName = ''; clearResult(); renderFiles(); renderOpts(); } }, 'Yangi fayllar bilan boshlash')),
       stat);
   }));
 }
 
-/* ---------- yoʻnaltirish: #siqish, #birlashtirish ... ---------- */
+/* ---------- yoʻnaltirish ---------- */
 function route() {
   const id = location.hash.slice(1);
   if (id && TOOLS.some(t => t.id === id)) openTool(id); else showHome();
@@ -585,7 +698,7 @@ route();
 (function () {
   const TELEGRAM_LINK = "https://t.me/kichikpdf_pro_bot"; 
   const VALID_CODES = ["1CHISAYT"]; 
-  const MONTH_MS = 30 * 24 * 60 * 60 * 1000; // 30 kun
+  const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
   const TODAY = new Date().toISOString().slice(0, 10);
 
