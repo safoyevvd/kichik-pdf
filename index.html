@@ -846,12 +846,12 @@ route();
   }
 
   const modal = document.createElement("div");
-  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;padding:16px;z-index:9999;";
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;padding:16px;z-index:9999;overflow-y:auto;";
   modal.innerHTML = `
-    <div style="width:100%;max-width:420px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 40px rgba(0,0,0,.25);">
+    <div id="kpdf-card" style="width:100%;max-width:420px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 40px rgba(0,0,0,.25);margin:auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h3 style="font-size:1.15rem;color:var(--red);">★ KichikPDF Premium</h3>
-        <button id="kpdf-close" type="button" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mute);">✕</button>
+        <button id="kpdf-close" type="button" style="background:none;border:none;font-size:1.3rem;padding:4px 8px;cursor:pointer;color:var(--mute);">✕</button>
       </div>
       <p id="kpdf-desc" style="font-size:.94rem;color:var(--mute);line-height:1.5;"></p>
       <div style="background:var(--tint);padding:12px;border-radius:8px;font-size:.88rem;line-height:1.5;">
@@ -859,14 +859,14 @@ route();
         ✓ 1 oy davomida cheksiz PDF qayta ishlash<br>
         ✓ Barcha vositalardan cheklovsiz foydalanish
       </div>
-      <a href="${TELEGRAM_LINK}" target="_blank" style="text-align:center;padding:12px;border-radius:8px;background:var(--red);color:var(--red-ink);font-weight:600;text-decoration:none;">
+      <a href="${TELEGRAM_LINK}" target="_blank" rel="noopener" style="text-align:center;padding:12px;border-radius:8px;background:var(--red);color:var(--red-ink);font-weight:600;text-decoration:none;">
         Telegram orqali Premium olish →
       </a>
       <div style="border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px;">
-        <label style="font:500 .75rem var(--f-mono);color:var(--mute);text-transform:uppercase;">Kodingiz bormi? Shu yerga kiriting:</label>
-        <div style="display:flex;gap:8px;">
-          <input id="kpdf-code" type="text" placeholder="Masalan: KICHIK2026" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);">
-          <button id="kpdf-activate" type="button" style="padding:10px 14px;border-radius:6px;border:none;background:var(--ink);color:var(--bg);font-weight:600;cursor:pointer;">Faollashtirish</button>
+        <label for="kpdf-code" style="font:500 .75rem var(--f-mono);color:var(--mute);text-transform:uppercase;">Kodingiz bormi? Shu yerga kiriting:</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <input id="kpdf-code" name="kpdf_promo_input" type="text" placeholder="Kodni kiriting" autocomplete="new-password" autocorrect="off" autocapitalize="characters" spellcheck="false" style="flex:1 1 160px;min-width:0;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);">
+          <button id="kpdf-activate" type="button" style="flex:0 0 auto;padding:10px 14px;border-radius:6px;border:none;background:var(--ink);color:var(--bg);font-weight:600;cursor:pointer;">Faollashtirish</button>
         </div>
         <small id="kpdf-msg" style="font-size:.82rem;"></small>
       </div>
@@ -890,9 +890,19 @@ route();
   }
 
   document.getElementById("kpdf-close").onclick = () => (modal.style.display = "none");
-  modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
 
-  document.getElementById("kpdf-activate").onclick = () => {
+  let promoBackdropPressed = false;
+  modal.addEventListener("pointerdown", (e) => {
+    promoBackdropPressed = (e.target === modal);
+  });
+  modal.addEventListener("pointerup", (e) => {
+    if (promoBackdropPressed && e.target === modal) {
+      modal.style.display = "none";
+    }
+    promoBackdropPressed = false;
+  });
+
+  function activatePromo() {
     const val = document.getElementById("kpdf-code").value.trim().toUpperCase();
     const msg = document.getElementById("kpdf-msg");
     if (VALID_CODES.includes(val)) {
@@ -905,7 +915,15 @@ route();
       msg.style.color = "var(--bad)";
       msg.textContent = "Notoʻgʻri kod! Telegram orqali yangi kod oling.";
     }
-  };
+  }
+
+  document.getElementById("kpdf-activate").onclick = activatePromo;
+  document.getElementById("kpdf-code").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      activatePromo();
+    }
+  });
 
   document.addEventListener("click", function (e) {
     const btn = e.target.closest("#go");
@@ -956,12 +974,12 @@ route();
 
   // Kirish modal oynasi
   const authModal = document.createElement("div");
-  authModal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;padding:16px;z-index:9999;";
+  authModal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;padding:16px;z-index:9999;overflow-y:auto;";
   authModal.innerHTML = `
-    <div style="width:100%;max-width:400px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 40px rgba(0,0,0,.25);">
+    <div style="width:100%;max-width:400px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 40px rgba(0,0,0,.25);margin:auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <h3 style="font-size:1.15rem;">Tizimga kirish</h3>
-        <button id="auth-close" type="button" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mute);">✕</button>
+        <button id="auth-close" type="button" style="background:none;border:none;font-size:1.3rem;padding:4px 8px;cursor:pointer;color:var(--mute);">✕</button>
       </div>
       <p style="font-size:.9rem;color:var(--mute);">KichikPDF hisobingizga kiring yoki yangi akkaunt yarating.</p>
       <button id="auth-google-btn" type="button" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:600;cursor:pointer;">
@@ -996,7 +1014,17 @@ route();
     authModal.style.display = "grid";
   };
   document.getElementById("auth-close").onclick = () => (authModal.style.display = "none");
-  authModal.onclick = (e) => { if (e.target === authModal) authModal.style.display = "none"; };
+
+  let authBackdropPressed = false;
+  authModal.addEventListener("pointerdown", (e) => {
+    authBackdropPressed = (e.target === authModal);
+  });
+  authModal.addEventListener("pointerup", (e) => {
+    if (authBackdropPressed && e.target === authModal) {
+      authModal.style.display = "none";
+    }
+    authBackdropPressed = false;
+  });
 
   function friendlyError(code) {
     if (code === "auth/invalid-email") return "Email manzili notoʻgʻri kiritildi.";
